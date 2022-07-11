@@ -1,0 +1,258 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Update Studio {% endblock %}
+
+
+{% block content %}
+
+    <div class="modal" id="update-studio-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+    
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="card Recent-Users">
+                        <div class="card-header">
+                            <h5 class="text-uppercase">Update Studio</h5>
+    
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body">
+    
+                    <form method="post" enctype="multipart/form-data" action="" id="update-studio-form">
+    
+                        {% csrf_token %}
+                        <div class="row">
+    
+                            {% for my_form in form %}
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <p>{{ my_form }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+    
+    
+    
+    
+    
+                            <div>
+                                <div class="modal-footer">
+                                    <a href="{% url 'studios' %}" type="button" class="btn btn-outline-danger"
+                                        data-dismiss="modal">Close</a>
+                                    <button type="submit" class="btn btn-outline-info">Save Studio</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+    
+    
+    
+    
+    
+    
+    
+                </div>
+            </div>
+        </div>
+    
+        <div class="toast" id="snackbar">
+            <div class="toast-header">
+    
+    
+            </div>
+            <div class="toast-body">
+                <center>
+                    <div class="card Recent-Users">
+                        <div class="card-header">
+                            <h5 class="text-uppercase" id="response"></h5>
+    
+                        </div>
+                    </div>
+                </center>
+    
+            </div>
+        </div>
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    <style>
+        #update-studio-modal {
+            display: block;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+        }
+    
+          #snackbar {
+      
+          visibility: hidden;
+          /* Hidden by default. Visible on click */
+          min-width: 250px;
+          /* Set a default minimum width */
+          margin-left: -125px;
+          /* Divide value of min-width by 2 */
+          color: black;
+          /* White text color */
+          border-radius: 2px;
+          /* Rounded borders */
+          background-color: white;
+          /* Padding */
+          position: absolute;
+          /* Sit on top of the screen */
+          margin-left: 75%;
+          /* Center the snackbar */
+          bottom: 0;
+          /* 30px from the bottom */
+          right: 60px;
+        }
+      
+        
+    
+        /* Show the snackbar when clicking on a button (class added with JavaScript) */
+        #snackbar.show {
+            visibility: visible;
+            /* Show the snackbar */
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+    
+        /* Animations to fade the snackbar in and out */
+        @-webkit-keyframes fadein {
+            from {
+                bottom: 0;
+                opacity: 0;
+            }
+    
+            to {
+                bottom: 30px;
+                opacity: 1;
+            }
+        }
+    
+        @keyframes fadein {
+            from {
+                bottom: 0;
+                opacity: 0;
+            }
+    
+            to {
+                bottom: 30px;
+                opacity: 1;
+            }
+        }
+    
+        @-webkit-keyframes fadeout {
+            from {
+                bottom: 30px;
+                opacity: 1;
+            }
+    
+            to {
+                bottom: 0;
+                opacity: 0;
+            }
+        }
+    
+        @keyframes fadeout {
+            from {
+                bottom: 30px;
+                opacity: 1;
+            }
+    
+            to {
+                bottom: 0;
+                opacity: 0;
+            }
+        }
+    </style>
+
+    <script>
+          var selector = $("#id_main_producer")
+            selector.addClass('form-control ')
+
+            $("option").each(function () {
+                if ($(this).val() == "") {
+                    $(this).html("Select Producer")
+                }
+
+            })
+
+             $(document).on("submit", "#update-studio-form", function (event) {
+                    event.preventDefault()
+
+                    const formdata = new FormData(this);
+                    const studio_name = formdata.get('studio_name');
+                    const location = formdata.get('location');
+                    const main_producer = formdata.get('main_producer');
+
+                    if (studio_name === "") {
+
+                        $("#error").html("Enter Studio Name")
+                    } else if (location === "") {
+                        $("#error").html("Enter Studio Location")
+
+                    } else {
+                        $.ajax({
+                            method: "POST",
+                            url: "{% url 'update-studio' pk %}",
+                            data: formdata,
+                            dataType: "json",
+                            processData: false,
+                            contentType: false,
+                            cache: false,
+                            mimeType: 'multipart/form-data',
+                            success: function (response) {
+
+                                if (response.saved === "Yes") {
+                                    //display the modal that data has been saved
+                                    const x = document.getElementById("snackbar");
+                                    x.className = "show";
+                                    setTimeout(function () { x.className = x.className.replace("show", ""); }, 10000);
+                                    $("#response").html("Studio Updated Successfully ")
+                                    $("#response").addClass("text-black")
+
+
+                                } else {
+                                    //display data was not saved
+                                    const x = document.getElementById("snackbar");
+                                    x.className = "show";
+                                    setTimeout(function () { x.className = x.className.replace("show", ""); }, 10000);
+                                    $("#response").html("Error While Updating Studio")
+                                    $("#response").addClass("text-danger")
+                                }
+
+                            },
+                            error: function (error) {
+                                console.log(error)
+                            }
+                        })
+                    }
+
+
+                });
+    </script>
+
+
+{% endblock content%}
